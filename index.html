@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Ensorra't</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; margin: 0; padding: 15px; }
+        h1 { color: #333; margin: 10px 0; font-size: 1.8rem; }
+        
+        /* Pantalla del Total */
+        .pantalla { font-size: 3rem; font-weight: bold; background: #222; color: #0f0; padding: 15px; border-radius: 10px; margin-bottom: 10px; }
+        
+        /* Tiquet de comanda */
+        .tiquet { 
+            background: #fff; 
+            border: 1px dashed #999; 
+            padding: 12px; 
+            max-width: 400px; 
+            margin: 0 auto 15px auto; 
+            border-radius: 8px; 
+            min-height: 40px; 
+            text-align: left;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .tiquet-buid { color: #aaa; text-align: center; font-style: italic; }
+        .linia-tiquet { display: flex; justify-content: space-between; font-size: 1.1rem; margin: 5px 0; font-weight: bold; }
+
+        /* Zona de Canvi de Diners */
+        .seccio-canvi {
+            background: #e9ecef;
+            border-radius: 12px;
+            padding: 15px;
+            max-width: 400px;
+            margin: 0 auto 20px auto;
+            box-sizing: border-box;
+        }
+        .canvi-flex { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .canvi-flex label { font-weight: bold; font-size: 1.1rem; }
+        .canvi-flex input { font-size: 1.3rem; padding: 8px; width: 100px; border-radius: 6px; border: 1px solid #ccc; text-align: right; }
+        
+        .botons-bitllets { display: flex; gap: 8px; margin-bottom: 12px; }
+        .boto-bitllet { flex: 1; padding: 10px; font-weight: bold; font-size: 1rem; border: 1px solid #ced4da; border-radius: 6px; background: #fff; cursor: pointer; }
+        .boto-bitllet:active { background: #dee2e6; }
+        
+        .pantalla-retornar { font-size: 1.6rem; font-weight: bold; color: #d9480f; text-align: right; border-top: 1px solid #ccc; padding-top: 10px; margin-top: 5px; }
+
+        /* Grelha de Botons de Productes */
+        .grup-botons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 400px; margin: 0 auto; }
+        .boto-producte { 
+            border: 2px solid rgba(0,0,0,0.1); 
+            border-radius: 12px; 
+            padding: 18px; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            color: #333;
+        }
+        .boto-producte:active { transform: scale(0.95); filter: brightness(0.9); }
+        
+        /* Botó de Netejar */
+        .boto-netejar { background: #ff4d4d; color: white; border: none; border-radius: 12px; padding: 18px; font-size: 1.4rem; font-weight: bold; margin-top: 20px; width: 100%; max-width: 400px; cursor: pointer; }
+        .boto-netejar:active { background: #cc0000; }
+        .preu-etiqueta { display: block; font-size: 0.9rem; opacity: 0.8; }
+        .text-blanc { color: white !important; }
+    </style>
+</head>
+<body>
+
+    <h1>Barra Ensorra't 🍻</h1>
+    
+    <!-- Total -->
+    <div class="pantalla" id="totalDisplay">0.00 €</div>
+
+    <!-- Tiquet -->
+    <div class="tiquet" id="tiquetCesta">
+        <div class="tiquet-buid">Cap producte seleccionat</div>
+    </div>
+
+    <!-- Calculadora de Canvi -->
+    <div class="seccio-canvi">
+        <div class="canvi-flex">
+            <label for="pagat">Et donen:</label>
+            <input type="number" id="pagat" placeholder="0.00" step="0.01" oninput="calcularCanvi()">
+        </div>
+        
+        <!-- Botons ràpids per a bitllets comuns -->
+        <div class="botons-bitllets">
+            <button class="boto-bitllet" onclick="pagarAmbBitllet(5)">5 €</button>
+            <button class="boto-bitllet" onclick="pagarAmbBitllet(10)">10 €</button>
+            <button class="boto-bitllet" onclick="pagarAmbBitllet(20)">20 €</button>
+            <button class="boto-bitllet" onclick="pagarAmbBitllet(50)">50 €</button>
+        </div>
+
+        <div class="pantalla-retornar" id="retornarDisplay">A retornar: 0.00 €</div>
+    </div>
+
+    <!-- Botons de Productes -->
+    <div class="grup-botons">
+        <button class="boto-producte" style="background-color: #FF922B;" onclick="afegir('Birra 🍺', 2.00)">🍺 Birra <span class="preu-etiqueta">2.00€</span></button>
+        <button class="boto-producte" style="background-color: #FF922B;" onclick="afegir('Refresc 🥤', 2.00)">🥤 Refresc <span class="preu-etiqueta">2.00€</span></button>
+        <button class="boto-producte" style="background-color: #4DABF7;" onclick="afegir('Aigua 💧', 1.00)">💧 Aigua <span class="preu-etiqueta">1.00€</span></button>
+        <button class="boto-producte" style="background-color: #FFE066;" onclick="afegir('Cubata 🍹', 5.00)">🍹 Cubata <span class="preu-etiqueta">5.00€</span></button>
+        <button class="boto-producte" style="background-color: #4DABF7;" onclick="afegir('Xarrup 🍷', 1.00)">🍷 Xarrup <span class="preu-etiqueta">1.00€</span></button>
+        <button class="boto-producte" style="background-color: #A9E34B;" onclick="afegir('A. València 🍊', 3.00)">🍊 A. València <span class="preu-etiqueta">3.00€</span></button>
+    </div>
+
+    <!-- Netejar -->
+    <button class="boto-netejar" onclick="netejar()">SEGÜENT CLIENT </button>
+
+    <script>
+        let total = 0.0;
+        let comanda = {}; 
+
+        function afegir(nomProducte, preu) {
+            total += preu;
+            
+            if (comanda[nomProducte]) {
+                comanda[nomProducte].quantitat += 1;
+            } else {
+                comanda[nomProducte] = { quantitat: 1, preuUnitari: preu };
+            }
+            
+            actualitzarPantalla();
+            calcularCanvi(); // Recalcula el canvi si afegeixes coses després de posar els diners
+        }
+
+        function pagarAmbBitllet(valor) {
+            document.getElementById('pagat').value = valor;
+            calcularCanvi();
+        }
+
+        function calcularCanvi() {
+            const pagatInput = document.getElementById('pagat').value;
+            const pagat = parseFloat(pagatInput) || 0;
+            const retornarDisplay = document.getElementById('retornarDisplay');
+            
+            if (pagat === 0 || total === 0) {
+                retornarDisplay.innerText = "A retornar: 0.00 €";
+                retornarDisplay.style.color = "#d9480f"; // Color carbassa normal
+                return;
+            }
+
+            const canvi = pagat - total;
+
+            if (canvi < 0) {
+                retornarDisplay.innerText = "Falten: " + Math.abs(canvi).toFixed(2) + " €";
+                retornarDisplay.style.color = "red"; // Si falten diners, es posa en vermell
+            } else {
+                retornarDisplay.innerText = "A retornar: " + canvi.toFixed(2) + " €";
+                retornarDisplay.style.color = "green"; // Si n'hi ha de sobres, es posa en verd
+            }
+        }
+
+        function netejar() {
+            total = 0.0;
+            comanda = {}; 
+            document.getElementById('pagat').value = ""; // Buida el quadre de text
+            actualitzarPantalla();
+        }
+
+        function actualitzarPantalla() {
+            document.getElementById('totalDisplay').innerText = total.toFixed(2) + " €";
+            const tiquetDiv = document.getElementById('tiquetCesta');
+            
+            if (Object.keys(comanda).length === 0) {
+                tiquetDiv.innerHTML = '<div class="tiquet-buid">Cap producte seleccionat</div>';
+                document.getElementById('retornarDisplay').innerText = "A retornar: 0.00 €";
+                document.getElementById('retornarDisplay').style.color = "#d9480f";
+                return;
+            }
+            
+            let htmlTiquet = "";
+            for (const nom in comanda) {
+                let subtotal = comanda[nom].quantitat * comanda[nom].preuUnitari;
+                htmlTiquet += `
+                    <div class="linia-tiquet">
+                        <span>${comanda[nom].quantitat}x ${nom}</span>
+                        <span>${subtotal.toFixed(2)}€</span>
+                    </div>`;
+            }
+            tiquetDiv.innerHTML = htmlTiquet;
+        }
+    </script>
+
+</body>
+</html>
